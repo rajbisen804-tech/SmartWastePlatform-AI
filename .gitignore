@@ -1,0 +1,20 @@
+# Python Virtual Environment
+backend/.venv/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Environment
+backend/.env
+frontend/.env.local
+
+# Python
+__pycache__/
+*.pyc
+
+# Uploads
+backend/uploads/
+
+# Zip files
+*.zip
