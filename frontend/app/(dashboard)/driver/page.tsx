@@ -72,7 +72,11 @@ export default function DriverDashboard() {
   }
 
   useEffect(() => {
-    loadReports();
+    const fetchReports = async () => {
+      await loadReports();
+    };
+
+    void fetchReports();
   }, []);
 
   const total = reports.length;

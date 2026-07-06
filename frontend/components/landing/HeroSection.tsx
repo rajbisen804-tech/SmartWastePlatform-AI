@@ -33,7 +33,7 @@ export default function HeroSection() {
                 Get Started
               </Button>
 
-              <Button variant="secondary">
+              <Button>
                 Live Demo
               </Button>
             </div>

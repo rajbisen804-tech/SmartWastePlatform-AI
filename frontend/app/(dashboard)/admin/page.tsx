@@ -83,7 +83,7 @@ export default function AdminPage() {
     }
   }
 
-  async function loadDrivers() {
+  const loadDrivers = useCallback(async () => {
     try {
       const res = await fetch(
         "http://127.0.0.1:8000/users/drivers"
@@ -100,45 +100,48 @@ export default function AdminPage() {
     } catch (err) {
       console.error(err);
     }
-  }
+  }, []);
 
   async function assignDriver(
-  reportId: number,
-  driverId: number
-) {
-  try {
-    const res = await fetch(
-      `http://127.0.0.1:8000/reports/${reportId}/assign-driver`,
-      {
-        method: "PATCH",
+    reportId: number,
+    driverId: number
+  ) {
+    try {
+      const res = await fetch(
+        `http://127.0.0.1:8000/reports/${reportId}/assign-driver`,
+        {
+          method: "PATCH",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        body: JSON.stringify({
-          driver_id: driverId,
-        }),
+          body: JSON.stringify({
+            driver_id: driverId,
+          }),
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error("Assignment failed");
       }
-    );
 
-    if (!res.ok) {
-      throw new Error("Assignment failed");
+      await loadReports();
+
+    } catch (err) {
+      console.error(err);
+
+      alert("Driver assignment failed");
     }
-
-    await loadReports();
-
-  } catch (err) {
-    console.error(err);
-
-    alert("Driver assignment failed");
   }
-}
 
   useEffect(() => {
-    loadReports();
-    loadDrivers();
-  }, [loadReports]);
+    const fetchInitialData = async () => {
+      await Promise.all([loadReports(), loadDrivers()]);
+    };
+
+    void fetchInitialData();
+  }, [loadReports, loadDrivers]);
 
   const filteredReports = useMemo(() => {
     return reports.filter((report) => {

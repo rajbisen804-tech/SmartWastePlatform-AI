@@ -21,6 +21,23 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  function getErrorMessage(err: unknown): string {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err
+    ) {
+      const response = (err as { response?: { data?: { detail?: unknown } } }).response;
+      const detail = response?.data?.detail;
+
+      if (typeof detail === "string") {
+        return detail;
+      }
+    }
+
+    return "Login failed";
+  }
+
   async function onSubmit(
     e: React.FormEvent<HTMLFormElement>
   ) {
@@ -34,11 +51,8 @@ export default function LoginPage() {
         email,
         password
       );
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.detail ||
-          "Login failed"
-      );
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -47,24 +61,19 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-cyan-50 px-6 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <motion.div
-
-          initial={{
-          opacity:0,
-          y:50,
-          }}
-
-          animate={{
-          opacity:1,
-          y:0,
-          }}
-
-          transition={{
-          duration:.6,
-          }}
-
-          className="glass w-full max-w-md rounded-3xl p-8 shadow-2xl"
-          
-      ></motion.div>
+        initial={{
+          opacity: 0,
+          y: 50,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          duration: 0.6,
+        }}
+        className="glass w-full max-w-md rounded-3xl p-8 shadow-2xl"
+      >
         <div className="text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600 text-3xl text-white">
             ♻️
@@ -106,30 +115,25 @@ export default function LoginPage() {
             </label>
 
             <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-emerald-500"
+              />
 
-            <input
-            type={showPassword ? "text" : "password"}
-            value={password}
-            onChange={(e)=>setPassword(e.target.value)}
-            placeholder="Enter your password"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-emerald-500"
-            />
-
-            <button
-            type="button"
-            onClick={()=>setShowPassword(!showPassword)}
-            className="absolute right-4 top-3"
-            >
-
-            {showPassword
-            ?
-            <IconEyeOff size={20}/>
-            :
-            <IconEye size={20}/>
-            }
-
-            </button>
-
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-3"
+              >
+                {showPassword ? (
+                  <IconEyeOff size={20} />
+                ) : (
+                  <IconEye size={20} />
+                )}
+              </button>
             </div>
           </div>
 
@@ -158,7 +162,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-4 text-center text-sm text-slate-500">
-          Don't have an account?
+          Dont have an account?
 
           <a
             href="/register"
@@ -167,8 +171,7 @@ export default function LoginPage() {
             Register
           </a>
         </div>
-
-      </div>
+      </motion.div>
     </main>
   );
 }
