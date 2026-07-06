@@ -1,7 +1,16 @@
+from app.db.database import Base, engine
+
+# Import ALL models
+from app.models.user import User
+from app.models.waste_report import WasteReport
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 from app.api.auth import router as auth_router
 from app.api.upload import router as upload_router
