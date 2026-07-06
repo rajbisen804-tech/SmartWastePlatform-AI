@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   IconEye,
   IconEyeOff,
@@ -11,9 +13,71 @@ import {
   IconPhone,
   IconLock,
 } from "@tabler/icons-react";
+import { register } from "@/services/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  function getErrorMessage(err: unknown): string {
+    if (
+      typeof err === "object" &&
+      err !== null &&
+      "response" in err
+    ) {
+      const response = (err as { response?: { data?: { detail?: unknown } } }).response;
+      const detail = response?.data?.detail;
+
+      if (typeof detail === "string") {
+        return detail;
+      }
+
+      if (Array.isArray(detail)) {
+        return detail
+          .map((item) => item?.msg)
+          .filter(Boolean)
+          .join(", ");
+      }
+    }
+
+    return "Registration failed";
+  }
+
+  async function onSubmit(
+    e: React.FormEvent<HTMLFormElement>
+  ) {
+    e.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    try {
+      await register({
+        full_name: fullName.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password,
+      });
+
+      toast.success("Account created. Please login.");
+      router.push("/login");
+    } catch (err: unknown) {
+      const message = getErrorMessage(err);
+
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <main className="auth-bg flex min-h-screen items-center justify-center px-6 py-10">
@@ -41,15 +105,23 @@ export default function RegisterPage() {
 
         </div>
 
-        <form className="mt-8 space-y-5">
+        <form
+          onSubmit={onSubmit}
+          className="mt-8 space-y-5"
+        >
 
           <div className="relative">
 
             <IconUser className="absolute left-4 top-3.5 text-slate-400" />
 
             <input
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="w-full rounded-xl border p-3 pl-11"
               placeholder="Full Name"
+              required
+              minLength={3}
+              maxLength={100}
             />
 
           </div>
@@ -59,9 +131,12 @@ export default function RegisterPage() {
             <IconMail className="absolute left-4 top-3.5 text-slate-400" />
 
             <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border p-3 pl-11"
               placeholder="Email"
               type="email"
+              required
             />
 
           </div>
@@ -71,8 +146,14 @@ export default function RegisterPage() {
             <IconPhone className="absolute left-4 top-3.5 text-slate-400" />
 
             <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="w-full rounded-xl border p-3 pl-11"
               placeholder="Phone Number"
+              type="tel"
+              required
+              minLength={10}
+              maxLength={15}
             />
 
           </div>
@@ -82,9 +163,13 @@ export default function RegisterPage() {
             <IconLock className="absolute left-4 top-3.5 text-slate-400" />
 
             <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border p-3 pl-11 pr-12"
               placeholder="Password"
               type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
             />
 
             <button
@@ -101,10 +186,18 @@ export default function RegisterPage() {
 
           </div>
 
+          {error && (
+            <div className="rounded-xl bg-red-100 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
+              {error}
+            </div>
+          )}
+
           <button
-            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700"
+            disabled={loading}
+            type="submit"
+            className="w-full rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-60"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
 
         </form>

@@ -4,6 +4,7 @@ from app.models.waste_report import WasteReport
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.core.config import settings
 from app.db.database import Base, engine
 import os
 
@@ -32,8 +33,9 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "https://smart-waste-platform-ai-ecru.vercel.app",
+        origin.strip()
+        for origin in settings.BACKEND_CORS_ORIGINS.split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],

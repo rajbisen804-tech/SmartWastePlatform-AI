@@ -2,8 +2,6 @@
 
 import { motion } from "framer-motion";
 import {
-  IconMail,
-  IconLock,
   IconEye,
   IconEyeOff,
 } from "@tabler/icons-react";

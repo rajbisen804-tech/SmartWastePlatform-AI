@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.core.security import (
     hash_password,
@@ -37,10 +38,14 @@ class AuthService:
             role="citizen",
         )
 
-        return UserRepository.create(
-            db,
-            user,
-        )
+        try:
+            return UserRepository.create(
+                db,
+                user,
+            )
+        except IntegrityError:
+            db.rollback()
+            raise ValueError("Email or phone already exists")
 
     @staticmethod
     def login(
@@ -63,6 +68,7 @@ class AuthService:
 
         access_token = create_access_token(
             {
+                "sub": str(user.id),
                 "user_id": user.id,
                 "email": user.email,
                 "role": user.role,
