@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+import os
 
 from app.api.auth import router as auth_router
 from app.api.upload import router as upload_router
 from app.api.report import router as report_router
 from app.api.user import router as user_router
 from app.api.ai import router as ai_router
+
+os.makedirs("uploads", exist_ok=True)
 
 app = FastAPI(
     title="EcoSync AI API",
