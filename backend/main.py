@@ -1,17 +1,14 @@
-from app.db.database import Base, engine
-
 # Import ALL models
 from app.models.user import User
 from app.models.waste_report import WasteReport
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.db.database import Base, engine
 import os
 
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
-
 from app.api.auth import router as auth_router
 from app.api.upload import router as upload_router
 from app.api.report import router as report_router
@@ -25,6 +22,10 @@ app = FastAPI(
     version="1.0.0",
     description="AI Powered Smart Waste Management Platform",
 )
+
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
 
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
