@@ -1,20 +1,24 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
 from alembic import context
 
 from app.core.config import settings
 from app.db.database import Base
 
-# Import all models here
+# Import models
 from app.models.user import User
+from app.models.waste_report import WasteReport
 
 config = context.config
 
 config.set_main_option(
     "sqlalchemy.url",
-    settings.DATABASE_URL.replace("%", "%%")
+    settings.DATABASE_URL,
 )
+
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
@@ -22,8 +26,10 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
+    url = config.get_main_option("sqlalchemy.url")
+
     context.configure(
-        url=settings.DATABASE_URL,
+        url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         compare_type=True,
